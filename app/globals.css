@@ -1,25 +1,32 @@
+```css
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+  /* Cute Pastel Palette */
+  --pk-bg: #fff0f5;       /* Lavender Blush - Main Background */
+  --pk-surface: #ffffff;  /* White - Card Surfaces */
+  --pk-primary: #ffb7b2;  /* Melon - Primary Buttons/Highlights */
+  --pk-secondary: #ff9aa2;/* Salmon Pink - Secondary Actions */
+  --pk-accent: #b5ead7;   /* Magic Mint - Success/Timers */
+  --pk-text: #4a4a4a;     /* Dark Grey - Main Text (Softer than black) */
+  --pk-text-light: #888888; 
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  /* Shapes & effects */
+  --radius-lg: 24px;
+  --radius-md: 16px;
+  --shadow-soft: 0 10px 25px -5px rgba(255, 183, 178, 0.4);
+  --shadow-pressed: inset 0 2px 4px 0 rgba(0, 0, 0, 0.06);
+
+  /* Animation defaults */
+  --ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 html,
 body {
   max-width: 100vw;
   overflow-x: hidden;
-}
-
-body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: 'Fredoka', 'Outfit', sans-serif; /* We will load this in layout */
+  background: linear-gradient(135deg, var(--pk-bg) 0%, #fff5f8 100%);
+  color: var(--pk-text);
+  min-height: 100vh;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
