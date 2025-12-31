@@ -25,16 +25,43 @@ const QUOTES = [
   "你是最棒的，别忘了给自己点赞 👍",
 ];
 
+const BENEFITS = [
+  "💡 长期坚持不仅能改善漏尿，还能显著提升核心稳定性。",
+  "💡 就像练马甲线一样，盆底肌也需要每天‘撸铁’哦！",
+  "💡 强大的盆底肌可以支撑内脏器官，是年轻态的秘密武器。",
+  "💡 每天几分钟，提升幸福感，无论男女都受益匪浅 ❤️",
+  "💡 这是一个可以随时随地进行的隐形运动，没人会发现！"
+];
+
 export default function KegelTimer({ onComplete, config }: Props) {
   const [phase, setPhase] = useState<Phase>("ready");
   const [seconds, setSeconds] = useState(3);
   const [rep, setRep] = useState(1);
   const [quote, setQuote] = useState(QUOTES[0]);
+  const [benefit, setBenefit] = useState(BENEFITS[0]);
 
   const audioContextRef = useRef<AudioContext | null>(null);
 
   // Use config props
   const { workTime, restTime, totalReps } = config;
+
+  // Save progress helper
+  const saveProgress = () => {
+    try {
+      const today = new Date();
+      const dateStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+
+      const stored = localStorage.getItem("kegel_history");
+      let history: string[] = stored ? JSON.parse(stored) : [];
+
+      if (!history.includes(dateStr)) {
+        history.push(dateStr);
+        localStorage.setItem("kegel_history", JSON.stringify(history));
+      }
+    } catch (e) {
+      console.error("Failed to save progress", e);
+    }
+  };
 
   const playTone = (type: 'tick' | 'change' | 'finish') => {
     // Basic Haptic
@@ -80,11 +107,15 @@ export default function KegelTimer({ onComplete, config }: Props) {
     }
   };
 
-  // Change quote randomly
   const cycleQuote = () => {
     const random = QUOTES[Math.floor(Math.random() * QUOTES.length)];
     setQuote(random);
   };
+
+  useEffect(() => {
+    // Pick a random benefit on mount for the end screen
+    setBenefit(BENEFITS[Math.floor(Math.random() * BENEFITS.length)]);
+  }, []);
 
   useEffect(() => {
     let interval: NodeJS.Timeout;
@@ -107,7 +138,7 @@ export default function KegelTimer({ onComplete, config }: Props) {
           if (s <= 1) {
             playTone('change');
             setPhase("rest");
-            cycleQuote(); // Show new encouragement during rest
+            cycleQuote();
             return restTime;
           }
           return s - 1;
@@ -119,6 +150,7 @@ export default function KegelTimer({ onComplete, config }: Props) {
           if (s <= 1) {
             if (rep >= totalReps) {
               playTone('finish');
+              saveProgress(); // Save to localStorage!
               setPhase("finished");
               return 0;
             }
@@ -147,13 +179,17 @@ export default function KegelTimer({ onComplete, config }: Props) {
         <div className="icon">🏆</div>
         <h2>太棒了！</h2>
         <p>你完成了 {totalReps} 组练习。</p>
-        <p className="quote">"每一次坚持，都是对身体最好的投资。"</p>
+
+        <div className="benefit-box">
+          <p className="benefit-text">{benefit}</p>
+        </div>
+
         <button onClick={onComplete} className="btn-primary">完成打卡</button>
         <style jsx>{`
           .card {
             background: rgba(255, 255, 255, 0.9);
             backdrop-filter: blur(10px);
-            padding: 3rem;
+            padding: 2.5rem;
             border-radius: var(--radius-lg);
             box-shadow: var(--shadow-soft);
             text-align: center;
@@ -161,15 +197,24 @@ export default function KegelTimer({ onComplete, config }: Props) {
             max-width: 400px;
             width: 90%;
           }
-          .icon { font-size: 4rem; margin-bottom: 1rem; }
-          .quote { 
-            font-style: italic; 
-            color: var(--pk-text-light);
+          .icon { font-size: 4rem; margin-bottom: 0.5rem; }
+          
+          .benefit-box {
+            background: #eefff5;
+            border-radius: 12px;
+            padding: 1rem;
             margin: 1.5rem 0;
-            font-size: 0.95rem;
+            border: 1px dashed var(--pk-accent);
           }
+          .benefit-text {
+            color: #2e7d32;
+            font-size: 0.9rem;
+            line-height: 1.5;
+            font-weight: 500;
+          }
+          
           .btn-primary {
-            margin-top: 1rem;
+            margin-top: 0.5rem;
             padding: 12px 32px;
             border-radius: var(--radius-lg);
             border: none;
@@ -188,6 +233,7 @@ export default function KegelTimer({ onComplete, config }: Props) {
     );
   }
 
+  // ... (Rest of UI is same as before, I will keep previous rendering logic)
   return (
     <div className="wrapper">
       <div className="blob blob-1"></div>

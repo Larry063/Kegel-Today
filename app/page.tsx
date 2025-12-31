@@ -3,6 +3,7 @@
 import { useState } from "react";
 import styles from "./page.module.css";
 import KegelTimer from "./components/KegelTimer";
+import ConsistencyCalendar from "./components/ConsistencyCalendar";
 
 // Define exercise modes
 type Mode = {
@@ -23,6 +24,8 @@ const MODES: Mode[] = [
 export default function Home() {
   const [isPlaying, setIsPlaying] = useState(false);
   const [selectedMode, setSelectedMode] = useState<Mode>(MODES[1]); // Default to Normal
+  const [isInfoOpen, setIsInfoOpen] = useState(false);
+  const [refreshKey, setRefreshKey] = useState(0); // Add key to force calendar refresh
 
   const startSession = () => {
     setIsPlaying(true);
@@ -30,6 +33,7 @@ export default function Home() {
 
   const finishSession = () => {
     setIsPlaying(false);
+    setRefreshKey(prev => prev + 1); // Refresh calendar after workout
   };
 
   return (
@@ -41,6 +45,30 @@ export default function Home() {
             每天一点点可爱，每天一点点健康。<br />
             准备好开始今天的练习了吗？
           </p>
+
+          {/* Pre-workout Info Card */}
+          <div className="info-card">
+            <button
+              className="info-toggle"
+              onClick={() => setIsInfoOpen(!isInfoOpen)}
+            >
+              <span>🤔 什么是凯格尔运动？</span>
+              <span>{isInfoOpen ? '▲' : '▼'}</span>
+            </button>
+
+            {isInfoOpen && (
+              <div className="info-content">
+                <p>凯格尔运动（Kegel exercises）也被称为骨盆运动，就像给你的盆底肌肉做“健身”！🏋️‍♀️</p>
+                <p>这组肌肉像一张吊床，托住你的子宫、膀胱和肠道。锻炼它们可以帮助：</p>
+                <ul>
+                  <li>✨ 改善漏尿尴尬</li>
+                  <li>✨ 提升紧致度</li>
+                  <li>✨ 产后快速恢复</li>
+                </ul>
+                <p className="highlight">做法很简单：像是憋尿一样收缩，然后放松。</p>
+              </div>
+            )}
+          </div>
 
           <div className="mode-selector">
             <p className="section-label">选择你的节奏</p>
@@ -59,7 +87,7 @@ export default function Home() {
             </div>
           </div>
 
-          <div style={{ marginTop: '2rem' }}>
+          <div style={{ marginTop: '1.5rem', marginBottom: '2rem' }}>
             <button
               onClick={startSession}
               className="start-btn"
@@ -68,27 +96,69 @@ export default function Home() {
             </button>
           </div>
 
+          {/* Calendar Section */}
+          <ConsistencyCalendar refreshTrigger={refreshKey} />
+
           <style jsx>{`
+            .info-card {
+              width: 100%;
+              max-width: 400px;
+              background: white;
+              border-radius: var(--radius-md);
+              margin: 1rem 0;
+              overflow: hidden;
+              box-shadow: 0 4px 10px rgba(0,0,0,0.03);
+            }
+            .info-toggle {
+              width: 100%;
+              padding: 1rem;
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+              background: none;
+              border: none;
+              font-size: 1rem;
+              font-weight: 600;
+              color: var(--pk-text);
+              cursor: pointer;
+            }
+            .info-content {
+              padding: 0 1rem 1rem 1rem;
+              color: var(--pk-text-light);
+              font-size: 0.9rem;
+              line-height: 1.6;
+              text-align: left;
+              animation: slideDown 0.3s ease;
+            }
+            .info-content ul {
+              margin: 0.5rem 0 0.5rem 1.5rem;
+            }
+            .highlight {
+              color: var(--pk-secondary);
+              font-weight: 600;
+              margin-top: 0.5rem;
+            }
+
             .mode-selector {
-              margin: 2rem 0;
+              margin: 1rem 0;
               width: 100%;
               max-width: 400px;
             }
             .section-label {
               font-size: 1rem;
               color: var(--pk-text-light);
-              margin-bottom: 1rem;
+              margin-bottom: 0.5rem;
               font-weight: 600;
             }
             .mode-grid {
               display: flex;
               flex-direction: column;
-              gap: 1rem;
+              gap: 0.8rem;
             }
             .mode-card {
               background: rgba(255,255,255,0.6);
               border: 2px solid transparent;
-              padding: 1rem 1.5rem;
+              padding: 0.8rem 1.2rem;
               border-radius: var(--radius-md);
               text-align: left;
               cursor: pointer;
@@ -104,15 +174,15 @@ export default function Home() {
             .mode-title {
               font-weight: 700;
               color: var(--pk-text);
-              font-size: 1.1rem;
+              font-size: 1.05rem;
             }
             .mode-desc {
-              font-size: 0.9rem;
+              font-size: 0.85rem;
               color: var(--pk-text-light);
-              margin: 4px 0;
+              margin: 2px 0;
             }
             .mode-time {
-              font-size: 0.8rem;
+              font-size: 0.75rem;
               font-weight: 600;
               color: var(--pk-secondary);
               background: #fff0f5;
@@ -136,6 +206,11 @@ export default function Home() {
             }
             .start-btn:active {
               transform: scale(0.96);
+            }
+            
+            @keyframes slideDown {
+              from { opacity: 0; transform: translateY(-10px); }
+              to { opacity: 1; transform: translateY(0); }
             }
           `}</style>
         </>
